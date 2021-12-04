@@ -4,6 +4,7 @@ import (
 	"x-bootstrap-node/xutil"
 
 	"github.com/perlin-network/noise"
+	"github.com/perlin-network/noise/kademlia"
 )
 
 var Node *noise.Node = nil
@@ -27,6 +28,9 @@ func InitP2P() {
 		}
 		return nil
 	})
+
+	k := kademlia.New()
+	Node.Bind(k.Protocol())
 
 	if err := Node.Listen(); err != nil {
 		panic(err)
