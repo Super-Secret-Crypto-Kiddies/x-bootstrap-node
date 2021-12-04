@@ -27,4 +27,8 @@ func InitP2P() {
 		}
 		return nil
 	})
+
+	if err := Node.Listen(); err != nil {
+		panic(err)
+	}
 }
