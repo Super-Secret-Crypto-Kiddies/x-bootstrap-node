@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 	"x-bootstrap-node/xutil"
-	"x-bootstrap-node/xutil/p2pshared"
 
 	"github.com/perlin-network/noise"
 	"github.com/perlin-network/noise/kademlia"
@@ -36,7 +35,7 @@ func InitP2P() {
 	k := kademlia.New()
 	Node.Bind(k.Protocol())
 
-	p2pshared.RegisterNodeMessages(Node)
+	xutil.RegisterNodeMessages(Node)
 
 	Node.Handle(handle)
 
