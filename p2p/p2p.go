@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"time"
 	"x-bootstrap-node/xutil"
+	"x-bootstrap-node/xutil/p2pshared"
 
 	"github.com/perlin-network/noise"
 	"github.com/perlin-network/noise/kademlia"
+	"go.uber.org/zap"
 )
 
 var Node *noise.Node
@@ -15,6 +17,8 @@ var ip = GetIPAddress()
 var port uint16 = 9871
 
 func InitP2P() {
+	logger, _ := zap.NewDevelopment()
+
 	address := fmt.Sprintf("%s:%d", ip, port)
 
 	fmt.Printf("Running on: %s\n", address)
@@ -22,6 +26,7 @@ func InitP2P() {
 	Node, err := noise.NewNode(
 		noise.WithNodeBindPort(port),
 		noise.WithNodeAddress(address),
+		noise.WithNodeLogger(logger),
 	)
 
 	if err != nil {
@@ -30,6 +35,9 @@ func InitP2P() {
 
 	k := kademlia.New()
 	Node.Bind(k.Protocol())
+
+	p2pshared.RegisterNodeMessages(Node)
+
 	Node.Handle(handle)
 
 	if err := Node.Listen(); err != nil {
