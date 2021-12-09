@@ -1,6 +1,7 @@
 package p2p
 
 import (
+	"context"
 	"fmt"
 	"time"
 	"x-bootstrap-node/xutil"
@@ -9,36 +10,27 @@ import (
 	"github.com/perlin-network/noise/kademlia"
 )
 
-var Node *noise.Node = nil
-
-const p2pPort = 9871
+var Node *noise.Node
+var ip = GetIPAddress()
+var port uint16 = 9871
 
 func InitP2P() {
+	address := fmt.Sprintf("%s:%d", ip, port)
 
-	var err error = nil
-	if Node, err = noise.NewNode(
-		noise.WithNodeBindPort(p2pPort),
-		// CHANGE THIS PLS
-		noise.WithNodeAddress(fmt.Sprintf("143.198.176.143:%d", p2pPort)),
-	); err != nil {
+	fmt.Printf("Running on: %s\n", address)
+
+	Node, err := noise.NewNode(
+		noise.WithNodeBindPort(port),
+		noise.WithNodeAddress(address),
+	)
+
+	if err != nil {
 		panic(err)
 	}
 
 	k := kademlia.New()
 	Node.Bind(k.Protocol())
-
-	Node.Handle(func(ctx noise.HandlerContext) error {
-
-		// handle raw []byte messages
-
-		if (string)(ctx.Data()) == "peerinfo" {
-			ctx.SendMessage(xutil.PeerInfo{
-				Type:       xutil.BootstrapNode,
-				Currencies: []string{},
-			})
-		}
-		return nil
-	})
+	Node.Handle(handle)
 
 	if err := Node.Listen(); err != nil {
 		panic(err)
@@ -46,9 +38,27 @@ func InitP2P() {
 
 	go func() {
 		for {
-			fmt.Printf("Peers: %s\n\n", k.Discover())
-			time.Sleep(30 * time.Second)
+			updatePeers(Node, k)
+			time.Sleep(time.Minute)
 		}
 	}()
+}
 
+func handle(ctx noise.HandlerContext) error {
+	if (string)(ctx.Data()) == "peerinfo" {
+		ctx.SendMessage(xutil.PeerInfo{
+			Type:       xutil.BootstrapNode,
+			Currencies: []string{},
+		})
+	}
+
+	return nil
+}
+
+func updatePeers(node *noise.Node, k *kademlia.Protocol) {
+	peers := k.Table().Peers()
+
+	for _, peer := range peers {
+		node.Ping(context.Background(), peer.Address)
+	}
 }
