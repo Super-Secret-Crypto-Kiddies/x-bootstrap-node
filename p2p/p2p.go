@@ -12,7 +12,7 @@ import (
 )
 
 var Node *noise.Node
-var ip = GetIPAddress()
+var ip = ipassign.GetIPv4Address()
 var port uint16 = 9871
 
 func InitP2P() {
