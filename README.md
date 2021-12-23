@@ -7,3 +7,8 @@ git clone --recursive https://github.com/Super-Secret-Crypto-Kiddies/x-bootstrap
 cd x-bootstrap-node
 make
 ```
+
+## View CLI Flags
+```
+./colinear-bootstrap-node --help
+```
