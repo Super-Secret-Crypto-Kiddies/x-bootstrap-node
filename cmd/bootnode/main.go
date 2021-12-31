@@ -17,8 +17,10 @@ import (
 )
 
 func main() {
+	ipv4 := ipassign.GetIPv4Address()
+
 	var (
-		listenAddr       = flag.String("address", "", "listen address (default IPv4 address)")
+		listenAddr       = flag.String("address", ipv4, "listen address (default IPv4 address)")
 		listenPort       = flag.Uint("port", 9871, "listen port")
 		useLogger        = flag.Bool("log", true, "use logger")
 		verbosity        = flag.Uint("verbosity", 4, "log verbosity (0-5)")
